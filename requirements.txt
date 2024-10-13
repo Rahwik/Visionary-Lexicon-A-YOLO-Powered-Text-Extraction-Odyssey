@@ -1,0 +1,10 @@
+Flask
+opencv-python
+pytesseract
+pdf2image
+torch
+torchvision
+numpy
+Pillow
+pandas
+requests

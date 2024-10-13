@@ -1,0 +1,122 @@
+/* Reset some default styles */
+body, h1, ul {
+    margin: 0;
+    padding: 0;
+}
+
+/* Body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sphere container styling */
+.sphere {
+    position: absolute;
+   
+}
+
+/* Container styling */
+.container {
+    background-color: rgba(255, 255, 255, 0.8); 
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    padding: 20px;
+    width: 300px; 
+    text-align: center;
+    position: relative; 
+    z-index: 10;
+}
+
+/* Heading styling */
+h1 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* File input styling */
+input[type="file"] {
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* Button styling */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Message list styling */
+ul {
+    list-style-type: none;
+    margin-top: 15px;
+}
+
+ul li {
+    color: red;
+    font-size: 14px;
+}
+
+/* Sphere styles from the original styles */
+:root {
+    --spheres: 25;
+    --bg-color: #111;
+    --light-color: hsl(calc(-140 + var(--milliseconds, 0) / 200), 80%, 70%);
+    --light-x: var(--cursor-x-1, 0);
+    --light-y: var(--cursor-y-1, 0);
+}
+
+body {
+    height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    margin: 0;
+    background: var(--bg-color);
+}
+
+.sphere {
+    /* Sphere styles remain unchanged */
+    position: absolute;
+}
+
+/* Add your keyframes and other sphere styles here */
+@keyframes wiggle {
+    25% {
+        translate: -30% -40%;
+    }
+    50% {
+        translate: -27% -45%;
+    }
+    50% {
+        translate: -55% -55%;
+    }
+    75% {
+        translate: -60% -25%;
+    }
+}

@@ -1,0 +1,136 @@
+/* Reset some default styles */
+body, h1, pre, a {
+    margin: 0;
+    padding: 0;
+}
+
+/* Body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    position: relative;
+}
+
+/* Container styling */
+.container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+}
+
+/* Heading styling */
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Preformatted text styling */
+pre {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    overflow: auto;
+    white-space: pre-wrap;
+    max-height: 400px;
+    margin-bottom: 20px;
+}
+
+/* Link styling */
+a {
+    display: inline-block;
+    margin: 10px 0;
+    color: #4CAF50;
+    text-decoration: none;
+    padding: 8px 12px;
+    border: 1px solid #4CAF50;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Link hover effects */
+a:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Spheres styles */
+:root {
+    --spheres: 25;
+    --bg-color: #111;
+    --light-color: hsl(calc(-140 + var(--milliseconds, 0) / 200), 80%, 70%);
+    --light-x: var(--cursor-x-1, 0);
+    --light-y: var(--cursor-y-1, 0);
+}
+
+body {
+    overflow: hidden;
+}
+
+.sphere {
+    --color: hsl(
+      calc(140 + var(--milliseconds, 0) / 200 + var(--i) * 5),
+      calc(40% + var(--i) * 1%),
+      calc(15% + var(--i) * .5%)
+    );
+    --row: sqrt(var(--spheres));
+    --cell: calc(.7 / var(--row));
+    --size: calc(100vmin / var(--row) / (var(--i) / var(--spheres)));
+    --x: calc(.2 + mod(var(--i), var(--row)) * var(--cell));
+    --y: calc(.2 + (var(--i) / var(--row) - .5) * var(--cell));
+    --distance-x: calc(var(--light-x) - var(--x));
+    --distance-y: calc(var(--light-y) - var(--y));
+    --distance: calc(sqrt(
+      var(--distance-x) * var(--distance-x) +
+      var(--distance-y) * var(--distance-y)
+    ));
+    --gradient-position:
+      calc(50% + 50% * var(--distance-x))
+      calc(50% + 50% * var(--distance-y));
+    position: absolute;
+    top: calc(var(--y) * 100%);
+    left: calc(var(--x) * 100%);
+    translate: -50% -50%;
+    width: min(var(--size), 120vmin);
+    height: min(var(--size), 120vmin);
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at var(--gradient-position),
+      var(--light-color),
+      var(--color) calc(50% + 50% * (1 - var(--distance)))
+    );
+    animation: wiggle 3s ease-in-out infinite;
+    animation-delay: calc(
+      var(--i) * -1s +
+      mod(var(--i), var(--row)) * -.1s
+    );
+    filter: blur(calc(2em - var(--i) * .1em));
+    transform: translateZ(0);
+    z-index: 1;
+}
+
+@keyframes wiggle {
+    25% {
+      translate: -30% -40%;
+    }
+    50% {
+      translate: -27% -45%;
+    }
+    50% {
+      translate: -55% -55%;
+    }
+    75% {
+      translate: -60% -25%;
+    }
+}
