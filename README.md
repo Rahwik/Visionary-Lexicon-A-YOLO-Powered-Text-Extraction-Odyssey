@@ -1,26 +1,25 @@
-Here's an extensive guide to creating a Flask-based Optical Character Recognition (OCR) project using YOLO and Tesseract for extracting text from PDFs. This guide will include the project structure, setup instructions, code for each component, and detailed explanations for each step.
-
 ### Project Overview
-This project will allow users to upload a PDF file, convert the PDF pages to images, detect text regions using YOLO, and extract text from those regions using Tesseract OCR.
+This project allows users to upload a PDF file, convert the PDF pages to images, detect text regions using YOLO, and extract text from those regions using Tesseract OCR.
 
 ### Directory Structure
-Here’s the detailed directory structure for your Flask application:
+Here’s the directory structure for your Flask application:
 
 ```
 ocr_flask_yolo_tesseract/
 │
-├── app/                    # Flask application folder
-│   ├── static/             # Static files (CSS, JavaScript, etc.)
-│   ├── templates/          # HTML templates
-│   │   ├── index.html      # Main HTML file for uploading PDF
-│   │   └── results.html     # HTML file for displaying extracted text
-│   ├── __init__.py         # Initializes the Flask app
-│   ├── routes.py           # Application routes
-│   ├── pdf_to_images.py    # Script to convert PDF to images
-│   ├── detect_text.py      # Script to detect text using YOLO
-│   ├── extract_text.py      # Script to extract text using Tesseract
-│   └── config.py           # Configuration file for the app
+├── static/                 # Static files (CSS, JavaScript, etc.)
+│   └── style.css           # CSS for styling
 │
+├── templates/              # HTML templates
+│   ├── index.html          # Main HTML file for uploading PDF
+│   └── results.html        # HTML file for displaying extracted text
+│
+├── __init__.py             # Initializes the Flask app
+├── routes.py               # Application routes
+├── pdf_to_images.py        # Script to convert PDF to images
+├── detect_text.py          # Script to detect text using YOLO
+├── extract_text.py         # Script to extract text using Tesseract
+├── config.py               # Configuration file for the app
 ├── requirements.txt        # Project dependencies
 ├── yolov3.weights          # Pre-trained YOLO weights
 ├── README.md               # Project documentation
@@ -74,39 +73,40 @@ Place the `yolov3.weights` file in the root of your project directory.
 ### Step 3: Create the Flask Application
 
 #### 3.1 Initialize the Flask App
-Create an `__init__.py` file in the `app/` directory:
+Create an `__init__.py` file in the root directory:
 
 ```python
-# app/__init__.py
+# __init__.py
 
 from flask import Flask
+import os
 
 def create_app():
     app = Flask(__name__)
     app.config['UPLOAD_FOLDER'] = 'uploads/'
-    
+
     # Ensure upload folder exists
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
 
     with app.app_context():
-        from . import routes
+        from routes import *
 
     return app
 ```
 
 #### 3.2 Set Up Routes
-Create a `routes.py` file in the `app/` directory:
+Create a `routes.py` file in the root directory:
 
 ```python
-# app/routes.py
+# routes.py
 
 import os
 from flask import render_template, request, redirect, url_for, flash, send_file
-from . import create_app
-from .pdf_to_images import pdf_to_images
-from .detect_text import detect_text
-from .extract_text import extract_text
+from pdf_to_images import pdf_to_images
+from detect_text import detect_text
+from extract_text import extract_text
+from __init__ import create_app
 
 app = create_app()
 
@@ -164,12 +164,12 @@ def download(filename):
 ```
 
 #### 3.3 Create HTML Templates
-Create a `templates` folder in the `app/` directory and add the following HTML files:
+Create a `templates` folder in the root directory and add the following HTML files:
 
 1. **index.html** (main upload page):
 
 ```html
-<!-- app/templates/index.html -->
+<!-- templates/index.html -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -203,7 +203,7 @@ Create a `templates` folder in the `app/` directory and add the following HTML f
 2. **results.html** (display extracted text):
 
 ```html
-<!-- app/templates/results.html -->
+<!-- templates/results.html -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -225,10 +225,10 @@ Create a `templates` folder in the `app/` directory and add the following HTML f
 ```
 
 #### 3.4 Create Static Files
-Create a `static` folder in the `app/` directory and add a `style.css` file for basic styling:
+Create a `static` folder in the root directory and add a `style.css` file for basic styling:
 
 ```css
-/* app/static/style.css */
+/* static/style.css */
 
 body {
     font-family: Arial, sans-serif;
@@ -268,10 +268,10 @@ button {
 ### Step 4: Create Utility Scripts
 
 #### 4.1 PDF to Images Conversion
-Create a `pdf_to_images.py` file in the `app/` directory:
+Create a `pdf_to_images.py` file in the root directory:
 
 ```python
-# app/pdf_to_images.py
+# pdf_to_images.py
 
 import os
 from pdf2image import convert_from_path
@@ -279,7 +279,7 @@ from pdf2image import convert_from_path
 def pdf_to_images(pdf_path, output_folder):
     # Convert PDF to images
     images = convert_from_path(pdf_path)
-    
+
     # Save images to the output folder
     for i, image in enumerate(images):
         image_path = os.path.join(output_folder, f'page_{i + 1}.png')
@@ -287,12 +287,11 @@ def pdf_to_images(pdf_path, output_folder):
         print(f'Saved: {image_path}')
 ```
 
-Certainly! Here’s the continuation of the **`detect_text.py`** script, along with the remaining files needed for the project:
-
-#### **4.2 Text Detection Using YOLO (Continued)**
+#### 4.2 Text Detection Using YOLO
+Create a `detect_text.py` file in the root directory:
 
 ```python
-# app/detect_text.py
+# detect_text.py
 
 import cv2
 import torch
@@ -309,65 +308,48 @@ def detect_text(image_path, output_folder):
     results = model(img)
 
     # Parse results
-    detections = results.xyxy[0]  # Get detections for the first image
+    detections = results.xyxy[0]  # Get detections (x1, y1, x2, y2, confidence, class)
 
-    # Draw bounding boxes on detected text
+    # Annotate detected text areas in the image
     for *box, conf, cls in detections:
         if conf > 0.5:  # Confidence threshold
             x1, y1, x2, y2 = map(int, box)
-            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Draw rectangle
+            cv2.putText(img, f'{model.names[int(cls)]}: {conf:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    # Save the detected image
-    detected_image_path = os.path.join(output_folder, os.path.basename(image_path))
-    cv2.imwrite(detected_image_path, img)
-    print(f'Detected text in: {detected_image_path}')
+    # Save the annotated image
+    output_image_path = os.path.join(output_folder, os.path.basename(image_path))
+    cv2.imwrite(output_image_path, img)
+    print(f'Detected and saved: {output_image_path}')
 ```
 
-### **4.3 Text Extraction Using Tesseract**
-
-Create an **`extract_text.py`** file in the **`app/`** directory:
+### 4.3 Text Extraction Using Tesseract
+Create an `extract_text.py` file in the root directory:
 
 ```python
-# app/extract_text.py
+# extract_text.py
 
 import pytesseract
-import cv2
+from PIL import Image
 
 def extract_text(image_path):
-    # Read the image
-    img = cv2.imread(image_path)
-
-    # Convert the image to RGB
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # Load image using PIL
+    img = Image.open(image_path)
 
     # Use Tesseract to extract text
-    text = pytesseract.image_to_string(img_rgb)
-
+    text = pytesseract.image_to_string(img)
+    
+    # Return extracted text
     return text
 ```
 
-### **Step 5: Configure Tesseract**
-
-Make sure to install Tesseract OCR on your machine:
-
-- **Windows**: You can download the Tesseract installer from [this link](https://github.com/UB-Mannheim/tesseract/wiki).
-- **macOS**: Use Homebrew: `brew install tesseract`.
-- **Linux**: Install using `apt`: `sudo apt install tesseract-ocr`.
-
-After installation, make sure to add the Tesseract executable to your system’s PATH. If it's not in your PATH, you can specify the path in your code. For example, in **`extract_text.py`**, add:
-
-```python
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Adjust this path as needed
-```
-
-### **Step 6: Create the Main Entry Point**
-
-Create a **`run.py`** file in the root directory of your project:
+### Step 5: Main Entry Point
+Create a `run.py` file in the root directory. This file will run your Flask application:
 
 ```python
 # run.py
 
-from app import create_app
+from __init__ import create_app
 
 app = create_app()
 
@@ -375,36 +357,49 @@ if __name__ == '__main__':
     app.run(debug=True)
 ```
 
-### **Step 7: Running the Application**
+### Step 6: Configuration File
+Create a `config.py` file in the root directory. This file can hold any configurations you may want to add in the future:
 
-1. Make sure your virtual environment is activated.
-2. Navigate to the project directory.
-3. Run the application with the command:
+```python
+# config.py
 
-   ```bash
-   python run.py
-   ```
+class Config:
+    UPLOAD_FOLDER = 'uploads/'
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Limit file size to 16 MB
+```
 
-4. Open your browser and go to **`http://127.0.0.1:5000`**. You should see the PDF upload form.
+### Step 7: Testing the Application
 
-### **Step 8: Testing the Application**
+#### 7.1 Running the Application
+Make sure your virtual environment is activated and then run the application using the following command:
 
-1. Upload a PDF file containing text.
-2. After the file is uploaded, the application will convert the PDF pages to images, detect the text regions, and extract the text.
-3. The extracted text will be displayed on the results page, and you will have the option to download the text file.
+```bash
+python run.py
+```
 
-### **Step 9: Data Sources for Testing**
+#### 7.2 Accessing the Application
+Open your web browser and go to `http://127.0.0.1:5000/`. You should see the upload page where you can select a PDF file and upload it for OCR processing.
 
-To test your application, you can use any sample PDF files containing text. You can create a PDF file using a word processor or download sample PDF documents from websites like:
+### Step 8: Notes
 
-- [Sample PDF Files](http://www.pdf995.com/samples/)
-- [PDF Archive](https://www.pdf-archive.com/)
+1. **Tesseract Installation**: 
+   - Make sure you have Tesseract OCR installed on your system. You can download it from [Tesseract's GitHub page](https://github.com/tesseract-ocr/tesseract). 
+   - Add the Tesseract executable to your system's PATH. You might also need to specify the Tesseract command path in your code if it's not globally accessible. You can do this by adding the following line at the beginning of `extract_text.py`:
+     ```python
+     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Adjust the path as necessary
+     ```
 
-### **Step 10: Final Thoughts and Enhancements**
+2. **YOLO Model**:
+   - The example uses the YOLOv5 model for detection. You can switch to a different model if needed by changing the model loading line in `detect_text.py`.
 
-- **Enhancements**: Consider adding features like error handling, support for multiple file formats, or improved UI/UX design.
-- **Performance Optimization**: If you're working with large PDFs, consider optimizing the image processing or allowing for batch processing.
+3. **Static Files**: 
+   - You can further enhance your `style.css` file for better aesthetics and user experience.
 
-### **Conclusion**
+### Final Thoughts
+This Flask project provides a basic framework for an OCR application using YOLO for text detection and Tesseract for text extraction. You can extend this project by adding features such as:
+- User authentication for managing uploads.
+- Storing extracted text in a database.
+- More sophisticated error handling and input validation.
+- Support for different image formats besides PDF.
 
-You now have a fully functional OCR application built using Flask, YOLO for text detection, and Tesseract for text extraction from PDFs. This detailed guide should help you understand each part of the project and customize it according to your needs. If you have any questions or need further assistance, feel free to ask!
+Feel free to ask if you have any questions or need further assistance!
